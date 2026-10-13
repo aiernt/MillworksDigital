@@ -1,0 +1,17 @@
+{
+  // Cloudflare Worker "millworksdigital": serves this folder as the static site and runs
+  // worker/index.js for /api/* (the contact form -> Resend relay).
+  "name": "millworksdigital",
+  "main": "worker/index.js",
+  "compatibility_date": "2025-09-01",
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS",
+    // Only /api/* goes through the worker; everything else is served straight from the files.
+    "run_worker_first": ["/api/*"]
+  },
+  // Keep the variables and secrets set in the Cloudflare dashboard
+  // (RESEND_API_KEY, CONTACT_TO, CONTACT_FROM) when deploying.
+  "keep_vars": true,
+  "observability": { "enabled": true }
+}

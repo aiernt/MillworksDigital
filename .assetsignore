@@ -1,0 +1,11 @@
+# Files in this folder that should NOT be published as part of the website.
+wrangler.jsonc
+worker
+backups
+.assetsignore
+.gitignore
+.dev.vars
+*.md
+.git
+node_modules
+.wrangler
