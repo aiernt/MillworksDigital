@@ -1,0 +1,251 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>body { margin: 0; background: #163a2e; } pre { white-space: pre-wrap; word-break: break-all; }</style>
+<script src="geometry.js"></script>
+</head><body>
+<pre id="out-big"></pre>
+<pre id="out-mark"></pre>
+<pre id="out-log"></pre>
+<script>
+function makeNoise(seed) {
+  const p = new Uint8Array(256), perm = new Uint8Array(512);
+  let s = seed >>> 0;
+  const rand = () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
+  for (let i = 0; i < 256; i++) p[i] = i;
+  for (let i = 255; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); const t = p[i]; p[i] = p[j]; p[j] = t; }
+  for (let i = 0; i < 512; i++) perm[i] = p[i & 255];
+  const grad = (h, x, y) => {
+    switch (h & 7) {
+      case 0: return x + y; case 1: return x - y; case 2: return -x + y; case 3: return -x - y;
+      case 4: return x; case 5: return -x; case 6: return y; default: return -y;
+    }
+  };
+  const fade = (t) => t * t * t * (t * (t * 6 - 15) + 10);
+  return (x, y) => {
+    const fx = Math.floor(x), fy = Math.floor(y);
+    const X = fx & 255, Y = fy & 255;
+    x -= fx; y -= fy;
+    const u = fade(x), v = fade(y);
+    const aa = perm[perm[X] + Y], ab = perm[perm[X] + Y + 1], ba = perm[perm[X + 1] + Y], bb = perm[perm[X + 1] + Y + 1];
+    const g1 = grad(aa, x, y), g2 = grad(ba, x - 1, y), g3 = grad(ab, x, y - 1), g4 = grad(bb, x - 1, y - 1);
+    const l1 = g1 + u * (g2 - g1), l2 = g3 + u * (g4 - g3);
+    return (l1 + v * (l2 - l1)) * 0.7;
+  };
+}
+const smooth = (e0, e1, x) => { const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+const mix = (a, b, t) => a + (b - a) * t;
+const clamp01 = (v) => Math.min(1, Math.max(0, v));
+const rng = (seed) => { let s = seed >>> 0; return () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; }; };
+
+// Hairline cracks that start at the rim and wander inward.
+function makeCracks(seed, count) {
+  const R = rng(seed), out = [];
+  for (let c = 0; c < count; c++) {
+    const th = R() * Math.PI * 2;
+    let p = [Math.cos(th) * 1.01, Math.sin(th) * 1.01];
+    let dir = Math.atan2(-p[1], -p[0]) + (R() - 0.5) * 0.9;
+    const pts = [p.slice()], len = 0.2 + R() * 0.26, steps = 30;
+    for (let i = 0; i < steps; i++) {
+      dir += (R() - 0.5) * 0.8;
+      p = [p[0] + (Math.cos(dir) * len) / steps, p[1] + (Math.sin(dir) * len) / steps];
+      pts.push(p.slice());
+    }
+    const xs = pts.map((q) => q[0]), ys = pts.map((q) => q[1]);
+    out.push({ pts, w0: 0.005 + R() * 0.003, minx: Math.min(...xs) - 0.02, maxx: Math.max(...xs) + 0.02, miny: Math.min(...ys) - 0.02, maxy: Math.max(...ys) + 0.02 });
+  }
+  return out;
+}
+function crackDist(c, x, y) {
+  if (x < c.minx || x > c.maxx || y < c.miny || y > c.maxy) return [Infinity, 0];
+  let best = Infinity, along = 0;
+  for (let i = 0; i < c.pts.length - 1; i++) {
+    const a = c.pts[i], b = c.pts[i + 1];
+    const abx = b[0] - a[0], aby = b[1] - a[1], apx = x - a[0], apy = y - a[1];
+    const t = clamp01((apx * abx + apy * aby) / (abx * abx + aby * aby));
+    const dx = apx - abx * t, dy = apy - aby * t, d = dx * dx + dy * dy;
+    if (d < best) { best = d; along = (i + t) / (c.pts.length - 1); }
+  }
+  return [Math.sqrt(best), along];
+}
+// Separable box blur, used to find recesses (dirt) and raised edges (wear).
+function boxBlur(src, S, rad) {
+  const tmp = new Float32Array(S * S), out = new Float32Array(S * S), n = 2 * rad + 1;
+  for (let y = 0; y < S; y++) {
+    let acc = 0; const row = y * S;
+    for (let x = -rad; x <= rad; x++) acc += src[row + Math.min(S - 1, Math.max(0, x))];
+    for (let x = 0; x < S; x++) {
+      tmp[row + x] = acc / n;
+      acc += src[row + Math.min(S - 1, x + rad + 1)] - src[row + Math.max(0, x - rad)];
+    }
+  }
+  for (let x = 0; x < S; x++) {
+    let acc = 0;
+    for (let y = -rad; y <= rad; y++) acc += tmp[Math.min(S - 1, Math.max(0, y)) * S + x];
+    for (let y = 0; y < S; y++) {
+      out[y * S + x] = acc / n;
+      acc += tmp[Math.min(S - 1, y + rad + 1) * S + x] - tmp[Math.max(0, y - rad) * S + x];
+    }
+  }
+  return out;
+}
+
+function render(S, o) {
+  const MG = window.MillstoneGeometry;
+  const G = Object.assign({}, MG.G, o.geom || {});
+  const F = MG.furrows(G).map((f) => ({
+    ax: f.A[0], ay: f.A[1], dx: f.d[0], dy: f.d[1], mx: f.n[0], my: f.n[1],
+    L: Math.hypot(f.B[0] - f.A[0], f.B[1] - f.A[1]),
+    wk: f.j === 0 ? 1.25 : 1, dk: f.j === 0 ? 1.2 : 1,   // master furrows are cut wider and deeper
+  }));
+  const W = o.w || G.w, D = o.depth || 0.014;
+  const wx = o.weather === undefined ? 1 : o.weather;    // how weathered the stone is
+  const sp = o.speck === undefined ? 1 : o.speck;
+  const Rpx = S * 0.46, c0 = S / 2;
+  const nA = makeNoise(11), nB = makeNoise(29), nC = makeNoise(53), nD = makeNoise(71), nE = makeNoise(97), nF = makeNoise(131), nG = makeNoise(173), nH = makeNoise(211), nI = makeNoise(239);
+  const fbm = (n, x, y, oct) => { let a = 0, amp = 1, f = 1, norm = 0; for (let i = 0; i < oct; i++) { a += amp * n(x * f, y * f); norm += amp; amp *= 0.5; f *= 2.03; } return a / norm; };
+  const chips = [[2.3, 0.045, 0.08], [4.95, 0.02, 0.05], [0.9, 0.014, 0.045], [3.6, 0.032, 0.1], [5.8, 0.012, 0.03], [1.5, 0.016, 0.06], [2.95, 0.01, 0.025], [0.25, 0.022, 0.05]];
+  const eyeChips = [[1.1, 0.09, 0.25], [4.2, 0.06, 0.2], [2.6, 0.04, 0.12]];
+  const cracks = o.cracks === false ? [] : makeCracks(7, 4);
+  const N = S * S;
+  const H = new Float32Array(N), GR = new Float32Array(N), AL = new Float32Array(N), CK = new Float32Array(N), SPL = new Float32Array(N), CH = new Float32Array(N);
+  for (let py = 0; py < S; py++) {
+    for (let px = 0; px < S; px++) {
+      const i = py * S + px;
+      const x = (px + 0.5 - c0) / Rpx, y = (py + 0.5 - c0) / Rpx;
+      const r = Math.hypot(x, y);
+      if (r > 1.04 || r < G.rEye * 0.6) { H[i] = 0.95; continue; }
+      const th = Math.atan2(y, x), ct = Math.cos(th), st = Math.sin(th);
+      let chipped = 0;
+      let rEdge = 1 - 0.012 - wx * (0.012 * nA(ct * 1.4 + 7, st * 1.4 + 7) + 0.008 * Math.abs(nF(ct * 7 + 1, st * 7 + 1)) + 0.005 * Math.abs(nE(ct * 26, st * 26)));
+      for (const [c, dep, wid] of chips) {
+        const dth = Math.atan2(Math.sin(th - c), Math.cos(th - c));
+        const k = Math.pow(Math.max(0, 1 - Math.abs(dth) / wid), 0.6) * (0.65 + 0.7 * (0.5 + 0.5 * nG(ct * 30, st * 30)));   // angular breaks
+        rEdge -= wx * dep * k; chipped = Math.max(chipped, k * dep / 0.045);
+      }
+      let rEyeE = G.rEye * (1 + wx * (0.06 * nB(ct * 2 + 3, st * 2 + 3) + 0.04 * Math.abs(nG(ct * 8, st * 8))));
+      for (const [c, dep, wid] of eyeChips) { const dth = Math.atan2(Math.sin(th - c), Math.cos(th - c)); rEyeE += G.rEye * wx * dep * Math.exp(-((dth / wid) ** 2)); }
+      // fine roughness on the silhouette only, so it doesn't streak the bevels
+      const rEdgeA = rEdge - wx * 0.0025 * Math.abs(nI(ct * 70, st * 70));
+      const rEyeA = rEyeE + G.rEye * wx * 0.02 * Math.abs(nI(ct * 30 + 5, st * 30 + 5));
+      AL[i] = clamp01((rEdgeA - r) * Rpx + 0.5) * clamp01((r - rEyeA) * Rpx + 0.5);
+      // worn, uneven face with granular roughness and pores
+      let h = 1 + wx * (0.014 * fbm(nC, x * 4 + 1.7, y * 4 + 4.2, 4) + 0.005 * fbm(nD, x * 70, y * 70, 3));
+      h += (o.grain || 0.003) * fbm(nD, x * 38 + 9, y * 38 - 4, 3);
+      h -= 0.008 * wx * smooth(0.36, 0.7, nE(x * 46, y * 46));            // pits
+      h -= 0.007 * wx * smooth(0.4, 0.72, nI(x * 110 + 1, y * 110 + 2));  // pores
+      const spall = smooth(0.17, 0.27, fbm(nG, x * 3 + 4, y * 3 - 6, 3)) * wx;   // flaked-off patches
+      h -= 0.006 * spall;
+      // furrows, with ragged chipped edges and stretches worn shallow
+      let g = 0, gd = 0;
+      const wobble = wx * (0.24 * nB(x * 24 + 2, y * 24 - 4) + 0.22 * nF(x * 60 + 3, y * 60 - 1));
+      for (let k = 0; k < F.length; k++) {
+        const f = F[k];
+        const qx = x - f.ax, qy = y - f.ay;
+        const t = qx * f.dx + qy * f.dy;
+        const Wf = W * f.wk;
+        if (t < -Wf || t > f.L + Wf) continue;
+        const sd = (qx * f.mx + qy * f.my) / Wf + wobble;
+        if (sd < -0.5 || sd > 1.2) continue;
+        let gv = sd < -0.1 ? smooth(-0.5, -0.1, sd) : 1 - smooth(-0.1, 1.2, sd);
+        if (t < 0) gv *= Math.max(0, 1 + t / Wf);
+        if (gv > g) { g = gv; gd = f.dk; }
+      }
+      g = clamp01(g * (1 + 0.3 * nD(x * 30 + 5, y * 30 + 5)));
+      const wear = 0.45 + 0.75 * (0.5 + 0.5 * nC(x * 4.5 - 3, y * 4.5 + 6));
+      h -= D * g * gd * wear;
+      let ck = 0;
+      for (const c of cracks) {
+        const [d, along] = crackDist(c, x, y);
+        const cw = c.w0 * (1 - 0.7 * along) * 1.8;
+        if (d < cw) ck = Math.max(ck, 1 - d / cw);
+      }
+      if (ck > 0) h -= 0.014 * ck * ck;
+      // lumpy, rounded skirt edge and a chipped, chamfered eye
+      const bw = 0.07 + 0.06 * (0.5 + 0.5 * nA(ct * 3 + 2, st * 3 - 1));
+      if (r > rEdge - bw) h -= (0.045 + 0.03 * (0.5 + 0.5 * nH(ct * 9, st * 9))) * ((r - (rEdge - bw)) / bw) ** 2;
+      const ew = 0.07 + 0.04 * (0.5 + 0.5 * nF(ct * 3, st * 3));
+      if (r < rEyeE + ew) h -= 0.055 * ((rEyeE + ew - r) / ew) ** 2;
+      H[i] = h; GR[i] = g * wear; CK[i] = ck; SPL[i] = spall; CH[i] = chipped * smooth(rEdge - 0.07, rEdge, r);
+    }
+  }
+  const BL = boxBlur(H, S, Math.max(2, Math.round(Rpx * 0.012)));
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = S;
+  const ctx = cv.getContext('2d');
+  const img = ctx.createImageData(S, S);
+  const px1 = 1 / Rpx, K = o.relief || 1.3;
+  let L = [-0.55, -0.62, 0.78]; const ll = Math.hypot(...L); L = L.map((v) => v / ll);
+  for (let py = 1; py < S - 1; py++) {
+    for (let px = 1; px < S - 1; px++) {
+      const i = py * S + px;
+      const a = AL[i];
+      if (a <= 0) continue;
+      const hx = (H[i + 1] - H[i - 1]) / (2 * px1), hy = (H[i + S] - H[i - S]) / (2 * px1);
+      let nx = -hx * K, ny = -hy * K, nz = 1;
+      const nl = Math.hypot(nx, ny, nz); nx /= nl; ny /= nl; nz /= nl;
+      const ndl = nx * L[0] + ny * L[1] + nz * L[2];
+      const x = (px + 0.5 - c0) / Rpx, y = (py + 0.5 - c0) / Rpx, r = Math.hypot(x, y);
+      const cav = BL[i] - H[i];                       // > 0 in recesses, < 0 on raised edges
+      let shade = 0.48 + (0.52 * Math.max(0, ndl)) / L[2];
+      shade *= 1 - (o.ao || 0.22) * GR[i];
+      shade *= 1 - 0.35 * clamp01(cav / 0.012);
+      shade *= 1 + 0.05 * (-0.55 * x - 0.6 * y);
+      // Gold to rust across the stone, muted by dust and sun
+      const tD = clamp01(0.5 + 0.36 * (x + y));
+      let cr = mix(227, 222, tD), cg = mix(172, 136, tD), cb = mix(82, 98, tD);
+      const dust = (0.1 + 0.14 * (0.5 + 0.5 * fbm(nH, x * 2.4 - 7, y * 2.4 + 3, 3))) * wx;
+      cr = mix(cr, 196, dust); cg = mix(cg, 170, dust); cb = mix(cb, 134, dust);
+      const mott = 0.4 * fbm(nA, x * 1.6 + 3, y * 1.6 + 5, 3) + 0.35 * fbm(nA, x * 3.2 + 9, y * 3.2 - 2, 4) + 0.25 * fbm(nF, x * 11 + 4, y * 11 - 7, 3);
+      cr += 30 * mott; cg += 26 * mott; cb += 18 * mott;
+      const stain = smooth(-0.04, 0.34, fbm(nB, x * 2.1 - 5, y * 2.1 + 8, 4)) * wx;                  // rust and water stains
+      cr = mix(cr, 150, stain * 0.5); cg = mix(cg, 86, stain * 0.5); cb = mix(cb, 48, stain * 0.5);
+      const streak = smooth(0.18, 0.42, fbm(nI, x * 14 + 2, y * 1.8 - 3, 3)) * wx;                  // run-off streaks
+      cr = mix(cr, 120, streak * 0.3); cg = mix(cg, 82, streak * 0.3); cb = mix(cb, 56, streak * 0.3);
+      const near = Math.min(1, smooth(0.78, 0.995, r) + smooth(G.rEye + 0.16, G.rEye, r));
+      const grime = near * (0.5 + 0.5 * (0.5 + 0.5 * nE(x * 6, y * 6))) * wx;                         // grime at the rim and eye
+      cr = mix(cr, 104, grime * 0.55); cg = mix(cg, 66, grime * 0.55); cb = mix(cb, 42, grime * 0.55);
+      const bleach = smooth(0.04, 0.4, fbm(nE, x * 2.6 + 11, y * 2.6 - 9, 4)) * wx;                 // sun-faded patches
+      cr = mix(cr, 236, bleach * 0.3); cg = mix(cg, 212, bleach * 0.3); cb = mix(cb, 174, bleach * 0.3);
+      const lich = smooth(0.26, 0.42, fbm(nG, x * 6.5 + 3, y * 6.5 + 8, 3)) * wx;                     // grey-green lichen crusts
+      const crust = lich * (0.6 + 0.4 * smooth(-0.2, 0.4, nI(x * 40, y * 40)));
+      cr = mix(cr, 156, crust * 0.7); cg = mix(cg, 156, crust * 0.7); cb = mix(cb, 132, crust * 0.7);
+      const pale = smooth(0.34, 0.46, fbm(nH, x * 9 - 4, y * 9 + 2, 3)) * wx;                         // pale crusty lichen
+      cr = mix(cr, 222, pale * 0.6); cg = mix(cg, 216, pale * 0.6); cb = mix(cb, 196, pale * 0.6);
+      const spots = smooth(0.5, 0.62, nH(x * 30 + 1, y * 30 - 2)) * wx;                               // dark lichen spots
+      cr = mix(cr, 58, spots * 0.7); cg = mix(cg, 50, spots * 0.7); cb = mix(cb, 40, spots * 0.7);
+      cr = mix(cr, 238, SPL[i] * 0.22); cg = mix(cg, 196, SPL[i] * 0.22); cb = mix(cb, 140, SPL[i] * 0.22);   // fresher stone where it flaked
+      cr = mix(cr, 236, CH[i] * 0.3); cg = mix(cg, 190, CH[i] * 0.3); cb = mix(cb, 130, CH[i] * 0.3);       // broken chips
+      const dark = Math.max(0.85 * smooth(0.32, 0.56, nC(x * 75 + 3, y * 75 + 1)), 0.7 * smooth(0.24, 0.5, nD(x * 170 - 7, y * 170 + 3))) * sp;
+      cr = mix(cr, 86, dark * 0.6); cg = mix(cg, 54, dark * 0.6); cb = mix(cb, 34, dark * 0.6);
+      const light = smooth(0.32, 0.58, -nE(x * 95 + 5, y * 95 + 9)) * sp;
+      cr = mix(cr, 250, light * 0.4); cg = mix(cg, 230, light * 0.4); cb = mix(cb, 196, light * 0.4);
+      const grit = ((((px * 73856093) ^ (py * 19349663)) >>> 0) % 1000 / 1000 - 0.5) * 16 * sp;
+      cr += grit; cg += grit * 0.9; cb += grit * 0.8;
+      const dirt = clamp01(cav / 0.009) * 0.55 * wx + GR[i] * (o.dirt || 0.2);                       // dirt packed into recesses
+      cr = mix(cr, 72, dirt); cg = mix(cg, 50, dirt); cb = mix(cb, 34, dirt);
+      const worn = clamp01(-cav / 0.006) * 0.35 * wx;                                                  // rubbed-bright edges
+      cr = mix(cr, 246, worn); cg = mix(cg, 214, worn); cb = mix(cb, 168, worn);
+      const ckD = 1 - 0.65 * CK[i];
+      cr *= ckD; cg *= ckD; cb *= ckD;
+      const lum = 0.299 * cr + 0.587 * cg + 0.114 * cb;                                                // tone the orange down a notch
+      const ds = o.desat === undefined ? 0.25 : o.desat;
+      cr = mix(cr, lum, ds); cg = mix(cg, lum, ds); cb = mix(cb, lum, ds);
+      const j = i * 4;
+      img.data[j] = Math.max(0, Math.min(255, cr * shade));
+      img.data[j + 1] = Math.max(0, Math.min(255, cg * shade));
+      img.data[j + 2] = Math.max(0, Math.min(255, cb * shade));
+      img.data[j + 3] = Math.round(a * 255);
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  return cv;
+}
+
+const t0 = performance.now();
+const big = render(1440, { cracks: false });
+document.getElementById('out-big').textContent = big.toDataURL('image/webp', 0.86);
+const mark = render(256, { w: 0.045, depth: 0.02, ao: 0.4, dirt: 0.3, speck: 0.3, grain: 0.0012, weather: 0.7, cracks: false, relief: 1.1 });
+document.getElementById('out-mark').textContent = mark.toDataURL('image/webp', 0.92);
+document.getElementById('out-log').textContent = 'done in ' + Math.round(performance.now() - t0) + 'ms';
+</script>
+</body></html>
