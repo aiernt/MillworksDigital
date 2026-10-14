@@ -47,7 +47,7 @@
 
     /* Space */
     --gutter: clamp(16px, 4vw, 40px);
-    --section: clamp(72px, 10vw, 136px);
+    --section: clamp(54px, 7.5vw, 88px);
     --radius: 24px;
   }
   @media (prefers-color-scheme: dark) {
@@ -320,7 +320,7 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: center;
     gap: clamp(24px, 3vw, 40px);
-    padding-block: clamp(56px, 7vw, 104px) clamp(64px, 8vw, 116px);
+    padding-block: clamp(42px, 5.25vw, 66px) clamp(48px, 6vw, 74px);
   }
   .hero-copy {
     position: relative;
@@ -420,7 +420,7 @@
     display: grid;
     gap: 16px;
     max-width: 46rem;
-    margin-bottom: clamp(36px, 5vw, 64px);
+    margin-bottom: clamp(27px, 3.75vw, 40px);
   }
   .section-head p { max-width: 52ch; font-size: 1.22rem; color: var(--ink-2); }
   .title {
@@ -578,6 +578,97 @@
   }
   @media (max-width: 560px) {
     .steps { grid-template-columns: 1fr; }
+  }
+
+  /* Pricing */
+  .price-cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(16px, 2vw, 24px);
+    align-items: stretch;
+  }
+  .price-card {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-width: 0;
+    padding: clamp(26px, 3vw, 40px);
+    border-radius: var(--radius);
+    background: var(--card);
+    border: 1px solid var(--line);
+  }
+  .price-card.featured { background: var(--pine); color: var(--on-pine); border-color: var(--pine); --focus: var(--on-pine); }
+  .price-top { display: grid; gap: 8px; }
+  .price-name { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .price-name h3 { font-size: var(--size-h3); }
+  .price-tag {
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--gold);
+    color: #14201a;
+    font-family: var(--display);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .price-top p { color: var(--ink-2); }
+  .price-card.featured .price-top p { color: var(--on-pine-2); }
+  .price-amount { display: flex; align-items: baseline; gap: 8px; font-family: var(--display); }
+  .price-amount span { font-size: 1rem; color: var(--ink-2); }
+  .price-card.featured .price-amount span { color: var(--on-pine-2); }
+  .price-amount strong { font-size: clamp(2.4rem, 1.8rem + 1.6vw, 3.2rem); font-weight: 700; line-height: 1; letter-spacing: -0.03em; }
+  .price-list { display: grid; align-content: start; flex-grow: 1; margin: 0; padding: 0; list-style: none; }
+  .price-list li { padding-block: 12px; border-top: 1px solid var(--line); font-size: 1.04rem; line-height: 1.45; }
+  .price-card.featured .price-list li { border-top-color: var(--pine-line); }
+  .price-card .btn { width: 100%; }
+  .price-card .btn-quiet { padding: 16px 24px; font-size: 1.02rem; }
+  .price-card.featured .btn-light { background: var(--on-pine); color: var(--pine); }
+
+  .plan {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: clamp(24px, 3vw, 40px);
+    margin-top: clamp(16px, 2vw, 24px);
+    padding: clamp(26px, 3vw, 40px);
+    border-radius: var(--radius);
+    background: var(--pine);
+    color: var(--on-pine);
+  }
+  .plan-copy { flex: 3 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+  .plan-copy h3 { font-size: var(--size-h3); }
+  .plan-copy p { color: var(--on-pine-2); max-width: 52ch; }
+  .plan-offer {
+    align-self: flex-start;
+    margin-top: 4px;
+    padding: 8px 16px;
+    border: 1px solid var(--gold);
+    border-radius: 999px;
+    color: var(--gold);
+    font-family: var(--display);
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+  .plan-tiers { flex: 2 1 320px; min-width: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .plan-tier { display: flex; flex-direction: column; gap: 6px; padding: 20px; border: 1px solid var(--pine-line); border-radius: 16px; }
+  .plan-tier.featured { border-color: var(--gold); }
+  .plan-tier h4 { font-size: 1.05rem; font-weight: 600; }
+  .plan-tier .price-amount strong { font-size: 2.1rem; }
+  .plan-tier .price-amount span, .plan-tier p { color: var(--on-pine-2); }
+  .plan-tier p { font-size: 0.98rem; line-height: 1.45; }
+  .price-note { margin-top: clamp(20px, 2.4vw, 28px); max-width: 60ch; color: var(--ink-2); }
+  .price-note a { color: inherit; }
+  .price-extra { margin-top: -6px; font-size: 0.98rem; color: var(--ink-2); }
+  .price-access { display: flex; align-items: center; gap: 10px; margin-top: clamp(20px, 2.4vw, 28px); font-family: var(--display); font-size: 1rem; font-weight: 600; }
+  .price-access::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
+  .price-access + .price-note { margin-top: 10px; }
+  @media (max-width: 760px) {
+    .price-cards { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .plan-tiers { grid-template-columns: 1fr; }
   }
 
   /* About: the millstone, explained */
@@ -968,6 +1059,7 @@
       <a href="#services">Services</a>
       <a href="#work">Work</a>
       <a href="#process">Process</a>
+      <a href="#pricing">Pricing</a>
       <a href="#about">About</a>
       <a class="nav-cta" href="#contact">Get in touch</a>
     </nav>
@@ -1092,6 +1184,84 @@
           <p>Your site or tool goes live, and I stay on to fix, extend, and support it as your business grows.</p>
         </li>
       </ol>
+    </div>
+  </section>
+
+  <section class="section tint" id="pricing" aria-labelledby="pricing-title">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="title" id="pricing-title">Fair prices, no surprises</h2>
+        <p>These are starting prices. You'll get a fixed quote once we've talked through what your project needs.</p>
+      </div>
+      <div class="price-cards">
+        <article class="price-card">
+          <div class="price-top">
+            <div class="price-name"><h3>Starter</h3></div>
+            <p>A clean, quick site to get your business online.</p>
+          </div>
+          <p class="price-amount"><span>from</span><strong>$1,299</strong></p>
+          <ul class="price-list">
+            <li>1 to 5 pages</li>
+            <li>Designed for phones and desktops</li>
+            <li>Contact form that emails you</li>
+            <li>Two rounds of revisions</li>
+            <li>Live in about two weeks</li>
+          </ul>
+          <p class="price-extra">Just need one page on your own host? From $750.</p>
+          <a class="btn btn-quiet" href="#contact">Start with a note</a>
+        </article>
+        <article class="price-card featured">
+          <div class="price-top">
+            <div class="price-name"><h3>Business</h3><span class="price-tag">Most popular</span></div>
+            <p>A custom-designed site built around how your business works.</p>
+          </div>
+          <p class="price-amount"><span>from</span><strong>$2,499</strong></p>
+          <ul class="price-list">
+            <li>5 to 10 pages, designed from scratch</li>
+            <li>Edit your own text and photos</li>
+            <li>Inquiry form with email alerts</li>
+            <li>Search-friendly setup and speed tuning</li>
+            <li>Two rounds of revisions</li>
+          </ul>
+          <a class="btn btn-light" href="#contact">Start your project</a>
+        </article>
+        <article class="price-card">
+          <div class="price-top">
+            <div class="price-name"><h3>Custom</h3></div>
+            <p>Sites that do more, backed by a database and your own tools.</p>
+          </div>
+          <p class="price-amount"><span>from</span><strong>$4,499</strong></p>
+          <ul class="price-list">
+            <li>Booking, stores, or member areas</li>
+            <li>Admin page to manage your content</li>
+            <li>Connects to the software you already use</li>
+            <li>Planned and built in stages</li>
+            <li>Fixed quote after a short discovery call</li>
+          </ul>
+          <a class="btn btn-quiet" href="#contact">Start with a note</a>
+        </article>
+      </div>
+      <div class="plan">
+        <div class="plan-copy">
+          <h3>The Millwright Plan</h3>
+          <p>A millwright keeps the mill turning. The Millwright Plan does the same for your site, with hosting, backups, security updates, and uptime checks all handled for you. The site and domain are always yours.</p>
+          <p class="plan-offer">Choose a 12-month Plan and save 20% on your build (up to $500)</p>
+        </div>
+        <div class="plan-tiers">
+          <div class="plan-tier">
+            <h4>Basic</h4>
+            <p class="price-amount"><strong>$75</strong><span>/month</span></p>
+            <p>Hosting, backups, security updates</p>
+          </div>
+          <div class="plan-tier featured">
+            <h4>Standard</h4>
+            <p class="price-amount"><strong>$150</strong><span>/month</span></p>
+            <p>Basic, plus 2 hours of edits monthly</p>
+          </div>
+        </div>
+      </div>
+      <p class="price-access">Every site is built to WCAG 2.2 AA accessibility guidelines.</p>
+      <p class="price-note">Looking for a dashboard, automation, or a custom tool for your team? Software projects are quoted individually, so <a href="#contact">send a note</a> about what you have in mind.</p>
     </div>
   </section>
 
@@ -1237,6 +1407,7 @@
           <li><a href="#services">Services</a></li>
           <li><a href="#work">Work</a></li>
           <li><a href="#process">Process</a></li>
+          <li><a href="#pricing">Pricing</a></li>
           <li><a href="#about">About</a></li>
         </ul>
       </nav>
