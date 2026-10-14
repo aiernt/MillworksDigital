@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Millworks Digital</title>
-<meta name="description" content="Websites and custom software for businesses across the Carolinas, built by a one-person studio in Fort Mill, South Carolina.">
-<meta name="theme-color" content="#163a2e">
+<meta name="description" content="Websites and custom software for businesses across the Carolinas, built locally in Fort Mill, South Carolina.">
+<meta name="theme-color" content="#14243f">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
@@ -14,27 +14,28 @@
      bold element on the page; everything around it stays quiet. */
   :root {
     /* Color */
-    --flour: #f3f5ef;      /* page ground: fresh-milled flour, faintly green */
-    --flour-2: #e7ebe3;    /* tinted section */
-    --card: #fcfdfa;       /* raised surfaces: form, browser frames, cards */
-    --ink: #14201a;        /* text */
-    --ink-2: #4a5751;      /* secondary text */
-    --pine: #163a2e;       /* bands */
-    --pine-2: #1f4a3b;     /* light falling across the bands */
-    --on-pine: #f1f4ec;
-    --on-pine-2: #a9bdb1;
-    --moss: #2a5a46;       /* actions */
-    --moss-2: #1e4535;
-    --on-moss: #f6f8f2;
+    --flour: #f4f2ec;      /* page ground: fresh-milled flour, faintly green */
+    --flour-2: #e9e5dc;    /* tinted section */
+    --card: #fdfcf9;       /* raised surfaces: form, browser frames, cards */
+    --ink: #141b2b;        /* text */
+    --ink-2: #4b5468;      /* secondary text */
+    --pine: #14243f;       /* bands */
+    --pine-2: #1d3257;     /* light falling across the bands */
+    --on-pine: #f2efe7;
+    --on-pine-2: #aab4c8;
+    --moss: #1f3a68;       /* actions */
+    --moss-2: #162c52;
+    --on-moss: #f7f5ef;
     --alert: #a8371f;
-    --line: rgba(20, 32, 26, 0.12);
-    --line-2: rgba(20, 32, 26, 0.26);
-    --pine-line: rgba(241, 244, 236, 0.16);
-    --shadow: rgba(20, 32, 26, 0.18);
-    --focus: #2a5a46;
+    --line: rgba(20, 27, 43, 0.12);
+    --line-2: rgba(20, 27, 43, 0.26);
+    --pine-line: rgba(242, 239, 231, 0.16);
+    --shadow: rgba(20, 27, 43, 0.18);
+    --focus: #1f3a68;
     /* Small warm accents (kicker dot, highlights, hover tints); same in both themes.
        The millstone itself is a rendered image: images/millstone.webp and millstone-mark.webp. */
-    --gold: #e3ac52;
+    --gold: #d6a94f;
+    --brass-ink: #8a6420;  /* brass for text on light backgrounds */
 
     /* Type */
     --display: "Bricolage Grotesque", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -52,46 +53,48 @@
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --flour: #0d1512;
-      --flour-2: #111c18;
-      --card: #15221d;
-      --ink: #e6ebe3;
-      --ink-2: #a0afa7;
-      --pine: #12291f;
-      --pine-2: #1a3a2d;
-      --on-pine: #eef2ea;
-      --on-pine-2: #a6b9ad;
-      --moss: #a8d4bc;
-      --moss-2: #c2e3d1;
-      --on-moss: #0d1512;
+      --flour: #0c111b;
+      --flour-2: #111827;
+      --card: #161f30;
+      --ink: #e7e9ee;
+      --ink-2: #a3abbb;
+      --pine: #101b30;
+      --pine-2: #18284a;
+      --on-pine: #eef0f4;
+      --on-pine-2: #a8b3c7;
+      --moss: #a9c1ea;
+      --moss-2: #c6d6f2;
+      --on-moss: #0c111b;
       --alert: #f2a48c;
-      --line: rgba(230, 235, 227, 0.12);
-      --line-2: rgba(230, 235, 227, 0.26);
-      --pine-line: rgba(238, 242, 234, 0.14);
+      --line: rgba(231, 233, 238, 0.12);
+      --line-2: rgba(231, 233, 238, 0.26);
+      --pine-line: rgba(238, 240, 244, 0.14);
       --shadow: rgba(0, 0, 0, 0.5);
-      --focus: #a8d4bc;
+      --focus: #a9c1ea;
+      --brass-ink: #d6a94f;
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
-    --flour: #0d1512;
-    --flour-2: #111c18;
-    --card: #15221d;
-    --ink: #e6ebe3;
-    --ink-2: #a0afa7;
-    --pine: #12291f;
-    --pine-2: #1a3a2d;
-    --on-pine: #eef2ea;
-    --on-pine-2: #a6b9ad;
-    --moss: #a8d4bc;
-    --moss-2: #c2e3d1;
-    --on-moss: #0d1512;
+    --flour: #0c111b;
+    --flour-2: #111827;
+    --card: #161f30;
+    --ink: #e7e9ee;
+    --ink-2: #a3abbb;
+    --pine: #101b30;
+    --pine-2: #18284a;
+    --on-pine: #eef0f4;
+    --on-pine-2: #a8b3c7;
+    --moss: #a9c1ea;
+    --moss-2: #c6d6f2;
+    --on-moss: #0c111b;
     --alert: #f2a48c;
-    --line: rgba(230, 235, 227, 0.12);
-    --line-2: rgba(230, 235, 227, 0.26);
-    --pine-line: rgba(238, 242, 234, 0.14);
+    --line: rgba(231, 233, 238, 0.12);
+    --line-2: rgba(231, 233, 238, 0.26);
+    --pine-line: rgba(238, 240, 244, 0.14);
     --shadow: rgba(0, 0, 0, 0.5);
-    --focus: #a8d4bc;
+    --focus: #a9c1ea;
+    --brass-ink: #d6a94f;
     color-scheme: dark;
   }
 
@@ -209,9 +212,13 @@
     font-weight: 700;
     letter-spacing: -0.015em;
     line-height: 1;
+    color: var(--gold);
     white-space: nowrap;
   }
   .brand-name span { font-weight: 400; color: var(--on-pine-2); }
+  .mw { color: var(--gold); }
+  .reach-value .mw { color: var(--brass-ink); }
+  .footer-mark .mw + span { font-weight: 400; color: var(--on-pine-2); }
   .site-nav {
     display: flex;
     align-items: center;
@@ -346,7 +353,7 @@
     font-weight: 700;
     line-height: 0.98;
     letter-spacing: -0.028em;
-    text-shadow: 0 2px 22px rgba(8, 26, 19, 0.6), 0 1px 3px rgba(8, 26, 19, 0.35);   /* keeps letters crisp where they cross the stone */
+    text-shadow: 0 2px 22px rgba(8, 15, 32, 0.6), 0 1px 3px rgba(8, 15, 32, 0.35);   /* keeps letters crisp where they cross the stone */
   }
   .lede {
     max-width: min(36ch, 88%);
@@ -605,7 +612,7 @@
     padding: 6px 12px;
     border-radius: 999px;
     background: var(--gold);
-    color: #14201a;
+    color: #141b2b;
     font-family: var(--display);
     font-size: 0.78rem;
     font-weight: 600;
@@ -658,6 +665,14 @@
   .plan-tier .price-amount strong { font-size: 2.1rem; }
   .plan-tier .price-amount span, .plan-tier p { color: var(--on-pine-2); }
   .plan-tier p { font-size: 0.98rem; line-height: 1.45; }
+  /* Pricing: brass on the featured card and plan boxes; brass borders on hover for the others */
+  #pricing .price-card.featured,
+  #pricing .plan-tier { border-color: var(--gold); }
+  #pricing .price-card.featured .btn-light { background: var(--gold); border-color: var(--gold); color: #141b2b; }
+  #pricing .price-card.featured .btn-light:hover { background: color-mix(in srgb, var(--gold) 82%, #000); border-color: color-mix(in srgb, var(--gold) 82%, #000); }
+  #pricing .price-card:not(.featured) { transition: border-color 0.2s ease; }
+  #pricing .price-card:not(.featured):hover { border-color: var(--gold); }
+  #pricing .price-card .btn-quiet:hover { border-color: var(--gold); }
   .price-note { margin-top: clamp(20px, 2.4vw, 28px); max-width: 60ch; color: var(--ink-2); }
   .price-note a { color: inherit; }
   .price-extra { margin-top: -6px; font-size: 0.98rem; color: var(--ink-2); }
@@ -1076,7 +1091,7 @@
           <span>Fort&nbsp;Mill, South&nbsp;Carolina</span>
         </p>
         <h1 id="hero-title">Turning rough ideas into fine work.</h1>
-        <p class="lede">Millworks Digital is a one-person studio that builds websites and custom software for businesses across the Carolinas. You work with me directly, from the first conversation to long after launch.</p>
+        <p class="lede">Your website should bring in customers, and your software should save you time. <span class="mw">Millworks</span> Digital builds both, right here in the Carolinas.</p>
         <div class="actions">
           <a class="btn btn-light" href="#contact">Tell me about your project</a>
           <a class="text-link" href="#work">See recent work <span class="arrow" aria-hidden="true">↓</span></a>
@@ -1091,7 +1106,7 @@
   <section class="section" id="services" aria-labelledby="services-title">
     <div class="wrap">
       <div class="section-head">
-        <h2 class="title" id="services-title">What I build</h2>
+        <h2 class="title" id="services-title">What we build</h2>
         <p>Two kinds of work: the things your customers see, and the tools your team uses behind the scenes.</p>
       </div>
       <div class="service-cards">
@@ -1101,10 +1116,10 @@
             <p>Websites and stores that represent your business well and are easy to use.</p>
           </div>
           <ul class="service-list">
-            <li><h4>Business websites</h4><p>Designed and built from scratch around your business.</p></li>
+            <li><h4>Business websites</h4><p>Designed and built from scratch around your business, fast on phones and accessible to everyone.</p></li>
             <li><h4>Online stores</h4><p>Storefronts and product catalogs that make browsing and buying simple.</p></li>
             <li><h4>Sites you can update</h4><p>Your staff can change text, photos, and pages without calling me.</p></li>
-            <li><h4>Redesigns and speed fixes</h4><p>New life for an existing site that looks dated or loads slowly.</p></li>
+            <li><h4>Redesigns and accessibility fixes</h4><p>New life for an existing site that looks dated, loads slowly, or shuts out visitors with disabilities.</p></li>
           </ul>
         </article>
         <article class="service-card back">
@@ -1116,7 +1131,7 @@
             <li><h4>Dashboards and business tools</h4><p>Internal apps that put your numbers and daily tasks in one place.</p></li>
             <li><h4>Workflow automation</h4><p>The repetitive steps in your process, handled automatically.</p></li>
             <li><h4>Integrations</h4><p>Connect the software you already use, so information moves between systems without retyping.</p></li>
-            <li><h4>Maintenance and support</h4><p>Fixes, updates, and new features after launch, from the person who built it.</p></li>
+            <li><h4>Maintenance and support</h4><p>Fixes, updates, and new features after launch, from the same hands that built it.</p></li>
           </ul>
         </article>
       </div>
@@ -1270,11 +1285,11 @@
       <div class="about-copy">
         <h2 class="title" id="about-title">Why a millstone</h2>
         <p>Fort&nbsp;Mill grew up around a grist mill on Steele&nbsp;Creek and later became a textile-mill town. It was built by people who made things that worked, and kept working, for a long time. The stone on this page is modeled on a millstone from Webb's&nbsp;Mill that's on display in town today.</p>
-        <p>A millstone does one job, every day, for years. It takes rough grain and turns it into something people can use. Millworks Digital holds its websites and software to that same standard, and every project is built carefully by one person you can actually reach.</p>
+        <p>A millstone does one job, every day, for years. It takes rough grain and turns it into something people can use. <span class="mw">Millworks</span> Digital holds its websites and software to that same standard, and every project is built carefully right here in Fort&nbsp;Mill, by someone you can sit down with.</p>
         <dl class="facts">
           <div><dt>Based in</dt><dd>Fort&nbsp;Mill, South&nbsp;Carolina</dd></div>
           <div><dt>Working with</dt><dd>Businesses across the Carolinas</dd></div>
-          <div><dt>Team</dt><dd>One person, one point of contact</dd></div>
+          <div><dt>Meetings</dt><dd>In person around Charlotte and Rock&nbsp;Hill</dd></div>
         </dl>
       </div>
       <figure class="stone-figure">
@@ -1297,7 +1312,7 @@
         <figcaption>
           <ol class="parts">
             <li data-part="eye"><strong>The eye.</strong> Grain goes in at the center. Every project starts with what your business needs.</li>
-            <li data-part="furrows"><strong>The furrows.</strong> Channels cut in sets called harps carry the grain outward. You have one person and one line of contact the whole way.</li>
+            <li data-part="furrows"><strong>The furrows.</strong> Channels cut in sets called harps carry the grain outward. Your project stays close to home, with someone nearby the whole way.</li>
             <li data-part="lands"><strong>The lands.</strong> The flat faces between the furrows do the grinding. That's the steady, careful part of the build.</li>
             <li data-part="skirt"><strong>The skirt.</strong> Near the edge, the stones run closest and the grind comes out fine. That's where the details get finished.</li>
           </ol>
@@ -1310,11 +1325,11 @@
     <div class="wrap contact-grid">
       <div class="contact-copy">
         <h2 class="title" id="contact-title">Tell me about your project</h2>
-        <p>Send a few lines about your business and what you have in mind, or give me a call. Every reply comes from me personally.</p>
+        <p>Send a few lines about your business and what you have in mind, or give me a call. Every reply comes from right here in Fort&nbsp;Mill.</p>
         <div class="reach">
           <div class="reach-item">
             <p class="reach-label">Email</p>
-            <a class="reach-value" id="email-address" href="mailto:hello@millworksdigital.com">hello@millworksdigital.com</a>
+            <a class="reach-value" id="email-address" href="mailto:hello@millworksdigital.com">hello@<span class="mw">millworks</span>digital.com</a>
             <div class="inline-actions">
               <button class="btn btn-quiet" type="button" id="copy-email">Copy address</button>
               <p class="status" id="copy-email-status" role="status" aria-live="polite"></p>
@@ -1397,7 +1412,7 @@
       <div class="footer-brand">
         <p class="footer-mark">
           <span class="footer-stone"><img src="images/millstone-mark.webp" width="256" height="256" alt="" loading="lazy" data-turn></span>
-          <span>Millworks Digital</span>
+          <span><span class="mw">Millworks</span> <span>Digital</span></span>
         </p>
         <p class="footer-tagline">Websites and custom software, built in Fort&nbsp;Mill, South&nbsp;Carolina.</p>
       </div>
@@ -1414,14 +1429,14 @@
       <div class="footer-col">
         <h2>Contact</h2>
         <ul>
-          <li><a href="mailto:hello@millworksdigital.com">hello@millworksdigital.com</a></li>
+          <li><a href="mailto:hello@millworksdigital.com">hello@<span class="mw">millworks</span>digital.com</a></li>
           <li><a href="tel:+18038201664">803-820-1664</a></li>
           <li>Fort&nbsp;Mill, SC</li>
         </ul>
       </div>
     </div>
     <div class="footer-base">
-      <p>© <span id="year">2026</span> Millworks Digital</p>
+      <p>© <span id="year">2026</span> <span class="mw">Millworks</span> Digital</p>
       <a href="#top">Back to top ↑</a>
     </div>
   </div>
