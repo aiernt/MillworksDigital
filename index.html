@@ -1483,7 +1483,7 @@
           <div class="field-row">
             <div class="field">
               <label for="starter-phone">Phone</label>
-              <input id="starter-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="60">
+              <input id="starter-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="60" placeholder="(803) 555-0123">
             </div>
             <div class="field">
               <label for="starter-business">Business <span class="optional">(optional)</span></label>
@@ -1758,6 +1758,40 @@
       }
     });
     form.addEventListener('input', () => { formError.hidden = true; });
+
+    // Phone: format US numbers as (803) 555-0123 while typing; leave +international numbers alone
+    const phoneInput = document.getElementById('starter-phone');
+    if (phoneInput) {
+      let prevDigits = '';
+      const formatPhone = (d) => {
+        if (d.length < 4) return d;
+        if (d.length < 7) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
+        return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
+      };
+      phoneInput.addEventListener('input', (event) => {
+        const el = phoneInput;
+        const value = el.value;
+        if (value.trim().startsWith('+')) { prevDigits = value.replace(/\D/g, ''); return; }
+        const caret = el.selectionStart ?? value.length;
+        let before = value.slice(0, caret).replace(/\D/g, '').length;
+        let digits = value.replace(/\D/g, '');
+        // Backspacing over a ( ) or - removes the digit before it
+        if (event.inputType === 'deleteContentBackward' && digits === prevDigits && before > 0) {
+          digits = digits.slice(0, before - 1) + digits.slice(before);
+          before -= 1;
+        }
+        if (digits.length > 10 && digits[0] === '1') { digits = digits.slice(1); before = Math.max(0, before - 1); }
+        digits = digits.slice(0, 10);
+        before = Math.min(before, digits.length);
+        const out = formatPhone(digits);
+        el.value = out;
+        let pos = 0, seen = 0;
+        while (pos < out.length && seen < before) { if (/\d/.test(out[pos])) seen++; pos++; }
+        while (before > 0 && pos < out.length && /[) -]/.test(out[pos])) pos++;
+        if (document.activeElement === el) el.setSelectionRange(pos, pos);
+        prevDigits = digits;
+      });
+    }
 
     // FAQ: slide answers open and closed
     document.querySelectorAll('.faq-item').forEach((item) => {
